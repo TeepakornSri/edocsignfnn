@@ -4,6 +4,8 @@ import { toast } from 'react-toastify'
 import { useState } from "react";
 import LoginInput from "./LoginInput";
 import LoginButton from "./LoginButton";
+import Swal from 'sweetalert2'
+
 
 
 export default function LoginForm() {
@@ -11,6 +13,27 @@ export default function LoginForm() {
         email: '',
         password: ''
     })
+
+
+    const handleLogout = () => {
+        logout();
+
+        if (authUser === null) {
+            alert('Please Login');
+        } else {
+            Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Log out",
+                showConfirmButton: false,
+                timer: 1500
+            });
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }
+    };
+
 
     const { login } = useAuth()
     const handleSubmitForm = e => {

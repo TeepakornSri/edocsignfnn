@@ -8,16 +8,16 @@ import { useAuth } from "../../hooks/use-auth"
 
 const registerSchema = Joi.object({
     firstName: Joi.string().trim().required(),
+    email: Joi.string().email({ tlds: { allow: false } }).required(), department: Joi.string().trim().required(),
+    profileImage: Joi.string().allow("", null),
+    role: Joi.string().trim(),
     lastName: Joi.string().trim().required(),
-    email: Joi.string().email({ tlds: false }).required(),
-    password: Joi.string()
-        .pattern(/^[a-zA-Z0-9]{6,30}$/)
-        .trim()
-        .required(),
+    password: Joi.string().pattern(/^[a-zA-Z0-9]{6,30}$/),
     confirmPassword: Joi.string()
         .valid(Joi.ref("password"))
         .trim()
-        .required(),
+        .required()
+        .strip(),
 });
 
 const validateregister = input => {
@@ -32,11 +32,11 @@ const validateregister = input => {
     }
 }
 
-
-
 export default function RegisterForm() {
     const [input, setInput] = useState({
         firstName: '',
+        department: '',
+        profileImage: '',
         lastName: '',
         email: '',
         password: '',
@@ -92,6 +92,17 @@ export default function RegisterForm() {
                 />
 
                 {error.email && <InputErrorMessage message={error.email} />}
+            </div>
+            <div className="col-span-full">
+                <RegisterInput
+                    placeholder=" Department"
+                    value={input.department}
+                    onChange={handleChangeInput}
+                    name="department" // แก้เป็น "department"
+                    hasError={error.department} // แก้เป็น "department"
+                />
+
+                {error.department && <InputErrorMessage message={error.department} />}
             </div>
 
             <div className="col-span-full">

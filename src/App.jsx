@@ -1,11 +1,23 @@
+import { ToastContainer } from "react-toastify";
 import Route from "./router/Routes"
-function App() {
+import { useAuth } from "./hooks/use-auth";
+import Loading from "./components/Loading";
 
+function App() {
+  const { initialLoading } = useAuth();
+  console.log(initialLoading);
   return (
     <>
-      <Route />
+      {initialLoading ? (
+        <Loading />
+      ) : (
+        <>
+          <Route />
+          <ToastContainer />
+        </>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -2,18 +2,36 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Layout from '../layout/Layout'
 import LoginPage from '../pages/Loginpage'
 import UploadPage from '../pages/Upload'
+import RedirectIfAuthenticated from '../features/RedireactIfAuthenticated'
+import AuthenticatedUser from '../features/AuthenticateUser'
 
 const router = createBrowserRouter([
     {
         path: '/',
+        children: [
+            {
+                path: '',
+                element: <RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>
+            }
+        ]
+    },
+    {
+        path: 'upload',
         element: <Layout />,
         children: [
-            { path: '', element: <LoginPage /> },
-            { path: 'upload', element: <UploadPage /> }
+
+            {
+                path: '',
+                element:
+                    <AuthenticatedUser>
+                        <UploadPage />
+                    </AuthenticatedUser>
+
+            }
         ]
     }
 ])
 
-export default function Route() {
+export default function Routes() {
     return <RouterProvider router={router} />
 }
