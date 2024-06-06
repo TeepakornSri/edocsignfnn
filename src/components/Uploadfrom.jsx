@@ -132,7 +132,7 @@ export default function Uploadform() {
             <div className="flex flex-col gap-4 justify-start items-start p-2">
                 <div className="flex flex-col md:flex-row justify-evenly bg-white w-full gap-4 p-4 ">
                     <div className="w-full flex flex-col gap-6">
-                        <h1 className="text-xl font-semibold">เอกสารเรื่อง</h1>
+                        <h1 className="text-xl font-semibold">หัวข้อเอกสาร</h1>
                         <input
                         type="text"
                         placeholder="ชื่อเอกสาร"
