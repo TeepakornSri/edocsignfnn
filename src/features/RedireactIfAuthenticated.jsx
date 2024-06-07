@@ -5,7 +5,7 @@ export default function RedirectIfAuthenticated({ children }) {
     const { authUser } = useAuth()
     if (authUser) {
         if (authUser.role === 'USER') {
-            return <Navigate to='/upload' />
+            return <Navigate to='/Homepage' />
         } else {
             return <Navigate to="/" />
         }

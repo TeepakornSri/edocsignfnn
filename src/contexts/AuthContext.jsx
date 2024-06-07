@@ -66,9 +66,11 @@ export default function AuthContextProvider({ children }) {
     };
 
     const logout = () => {
+        setInitialLoading(true);
         removeAccessToken();
         setAuthUser(null);
-    };
+        setInitialLoading(false);
+      };
 
     return (
         <AuthContext.Provider value={{ login, authUser, initialLoading, register, logout }}>

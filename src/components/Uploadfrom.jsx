@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import Loading from './Loading';
 import { useAuth } from '../hooks/use-auth';
 import InputErrorMessage from '../features/InputErrorMessage';
-
+import { Link } from 'react-router-dom';
 const CreateSchema = Joi.object({
     docNumber: Joi.string().trim().required(),
     docHeader: Joi.string().trim().required(),
@@ -108,7 +108,7 @@ export default function Uploadform() {
                     timer: 1500,
                 });
                 setTimeout(() => {
-                    // window.location.reload();
+                    window.location.reload();
                 }, 1500);
 
             }
@@ -184,9 +184,11 @@ export default function Uploadform() {
                         />
                         <div className="flex flex-row justify-end items-end gap-8">
                             <div>
-                                <button className="bg-slate-400 rounded-lg text-white px-3 py-1.5 text-lg font-bold min-w-[10rem] hover:bg-orange-300 hover:scale-125">
+                            <Link to='/Homepage'>
+                            <button className="bg-slate-400 rounded-lg text-white px-3 py-1.5 text-lg font-bold min-w-[10rem] hover:bg-orange-300 hover:scale-125">
                                     ย้อนกลับ
                                 </button>
+                                </Link>
                             </div>
                             <div>
                                 <button
