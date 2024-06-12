@@ -18,7 +18,7 @@ export default function SearchAppBar() {
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleLogout = async () => {
-        await logout(); // Ensure logout is handled before checking authUser
+        await logout();
         Swal.fire({
             position: "center",
             icon: "success",
@@ -29,7 +29,9 @@ export default function SearchAppBar() {
             window.location.href = '/';
         });
     };
-
+    const handlereload = () => {
+        window.location.href = '/';
+    };
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -50,7 +52,7 @@ export default function SearchAppBar() {
                             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
                             className='p-2'
                         >
-                            <div className='flex flex-col gap-2'>
+                            <div className='flex flex-col gap-2 cursor-pointer'>
                                 <h1 className='text-white'>Sign in as</h1>
                                 {authUser ? (
                                     <div className='text-white text-xl font-semibold'>
@@ -70,11 +72,11 @@ export default function SearchAppBar() {
                             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
                             className='p-4'
                         >
-                            <h1 className='text-4xl font-semibold text-white'>Upload Doc</h1>
+                            <h1 className='text-4xl font-semibold text-white cursor-pointer'>Upload Doc</h1>
                         </Typography>
                         <div className='flex flex-row justify-center items-center text-white'>
                             <div className='flex flex-row gap-6'>
-                                <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer'><IoReload /></div>
+                                <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer' onClick={handlereload}><IoReload /></div>
                                 <Link to='/upload'>
                                     <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer'><IoIosAddCircleOutline /></div>
                                 </Link>

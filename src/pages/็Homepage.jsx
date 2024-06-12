@@ -6,16 +6,6 @@ import { useDoc } from '../hooks/use-doc';
 
 
 export default function HomePage() {
-    // const {allDoc} = useDoc();
-    // useEffect(() => {
-    //     allDoc()
-    //       .then((res) => {
-    //         console.log(res);
-    //       })
-    //       .catch((err) => {
-    //         console.log(err);
-    //       });
-    //   }, []);
 
     return (
         <div className="h-screen w-full  flex flex-col">

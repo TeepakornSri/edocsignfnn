@@ -1,10 +1,10 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import Layout from '../layout/Layout'
-import LoginPage from '../pages/Loginpage'
-import UploadPage from '../pages/Upload'
-import HomePage from '../pages/Homepage'
-import RedirectIfAuthenticated from '../features/RedireactIfAuthenticated'
-import AuthenticatedUser from '../features/AuthenticateUser'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import Layout from '../layout/Layout';
+import LoginPage from '../pages/Loginpage';
+import UploadPage from '../pages/Upload';
+import RedirectIfAuthenticated from '../features/RedireactIfAuthenticated';
+import AuthenticatedUser from '../features/AuthenticateUser';
+import HomePage from '../pages/็Homepage';
 
 const router = createBrowserRouter([
     {
@@ -12,42 +12,46 @@ const router = createBrowserRouter([
         children: [
             {
                 path: '',
-                element: <RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>
-            }
-        ]
-    },
+                element: (
+                    <RedirectIfAuthenticated>
+                        <LoginPage />
+                    </RedirectIfAuthenticated>
+                ),
+            },
+        ],
+    }
+    ,
     {
-        path: 'Homepage',
-        element: <Layout />,
+        path: '/Homepage',
+        element: (
+        <AuthenticatedUser>
+        <Layout />
+        </AuthenticatedUser>
+        ),
         children: [
-
             {
                 path: '',
-                element:
-                    <AuthenticatedUser>
-                        <HomePage />
-                    </AuthenticatedUser>
-
-            }
-        ]
+                element: <HomePage/>,
+            },
+        ],
     },
+
     {
-        path: 'upload',
+        path: '/upload',
         element: <Layout />,
         children: [
-
             {
                 path: '',
-                element:
+                element: (
                     <AuthenticatedUser>
                         <UploadPage />
                     </AuthenticatedUser>
-
-            }
-        ]
-    }
-])
+                ),
+            },
+        ],
+    },
+]);
 
 export default function Routes() {
-    return <RouterProvider router={router} />
+    return <RouterProvider router={router} />;
 }
