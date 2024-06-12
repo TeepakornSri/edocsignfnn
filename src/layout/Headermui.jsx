@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -9,13 +10,26 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { useAuth } from '../hooks/use-auth';
 import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom';
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { IoReload } from "react-icons/io5";
 
 export default function SearchAppBar() {
     const { logout, authUser } = useAuth();
     const [anchorEl, setAnchorEl] = useState(null);
+    const location = useLocation();
+
+    const getTitleByPath = (path) => {
+        switch (path) {
+            case '/upload':
+                return 'Upload Doc';
+            case '/edit':
+                return 'Edit Doc';
+            case '/view':
+                return 'View Doc';
+            default:
+                return 'HomePage';
+        }
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -29,9 +43,11 @@ export default function SearchAppBar() {
             window.location.href = '/';
         });
     };
+
     const handlereload = () => {
         window.location.href = '/';
     };
+
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -44,14 +60,8 @@ export default function SearchAppBar() {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="sticky">
                 <Toolbar>
-                    <div className='flex flex-row justify-evenly w-full'>
-                        <Typography
-                            variant="h6"
-                            noWrap
-                            component="div"
-                            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
-                            className='p-2'
-                        >
+                    <div className='flex flex-row justify-evenly  w-full'>
+                        <Typography className = 'flex-1'>
                             <div className='flex flex-col gap-2 cursor-pointer'>
                                 <h1 className='text-white'>Sign in as</h1>
                                 {authUser ? (
@@ -65,21 +75,16 @@ export default function SearchAppBar() {
                                 )}
                             </div>
                         </Typography>
-                        <Typography
-                            variant="h6"
-                            noWrap
-                            component="div"
-                            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
-                            className='p-4'
-                        >
-                            <h1 className='text-4xl font-semibold text-white cursor-pointer'>Upload Doc</h1>
+                        <Typography className='flex justify-center items-center flex-1  '>
+                            <h1 className='text-4xl font-semibold text-white cursor-pointer'>
+                                {getTitleByPath(location.pathname)}
+                            </h1>
                         </Typography>
-                        <div className='flex flex-row justify-center items-center text-white'>
+                        <div className='flex flex-row justify-end items-center text-white flex-1 '>
                             <div className='flex flex-row gap-6'>
                                 <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer' onClick={handlereload}><IoReload /></div>
-                                <Link to='/upload'>
-                                    <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer'><IoIosAddCircleOutline /></div>
-                                </Link>
+                                {location.pathname !== '/upload' && (<Link to='/upload'>
+                                <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer'><IoIosAddCircleOutline /></div></Link>)}
                             </div>
                             <div className='ml-12'>
                                 <IconButton

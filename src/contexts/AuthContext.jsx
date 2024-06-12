@@ -44,7 +44,7 @@ export default function AuthContextProvider({ children }) {
                 position: "center",
                 icon: "error",
                 title: "Login failed",
-                text: "Please check your credentials and try again.",
+                text: "Email หรือ รหัสไม่ถูกต้อง",
                 showConfirmButton: true,
             });
         }

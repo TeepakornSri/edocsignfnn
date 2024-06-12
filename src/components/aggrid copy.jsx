@@ -14,6 +14,7 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit } from "react-icons/md";
 import { MdDeleteForever } from "react-icons/md";
 
+
 export default function DocTable() {
   const [allDoc, setAllDoc] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,21 +26,22 @@ export default function DocTable() {
   useEffect(() => {
     setLoading(true);
     axios.get('/content/showalldoc')
-      .then(res => {
-        setAllDoc(res.data.documents);
-      })
-      .catch(err => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'ไม่สามารถโหลดข้อมูลได้',
-          confirmButtonText: 'OK'
+        .then(res => {
+            // console.log("Response data:", res.data);
+            setAllDoc(res.data.documents);  
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'ไม่สามารถโหลดข้อมูลได้',
+                confirmButtonText: 'OK'
+            });
+        })
+        .finally(() => {
+            setLoading(false);
         });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   }, []);
 
   useEffect(() => {
@@ -71,20 +73,9 @@ export default function DocTable() {
   const columnDefs = useMemo(() => [
     { field: "id", headerName: "ID", width: 90, filter: true },
     { field: "docNumber", headerName: "Document Number", flex: 1, filter: true },
-    {
-      field: "docHeader",
-      headerName: "Subject",
-      flex: 1,
-      filter: true,
-      autoHeight: true,
-      cellRendererFramework: params => (
-        <div style={{ whiteSpace: 'normal', overflowWrap: 'break-word', lineHeight: '1.5' }}>
-          {params.value}
-        </div>
-      ),
-      cellStyle: { 'white-space': 'normal', 'word-wrap': 'break-word' }
-    },
+    { field: "docHeader", headerName: "Subject", flex: 1, filter: true },
     { field: "createdAt", headerName: "Submitted On", flex: 1, filter: true, cellRenderer: params => formatDate(params.value) },
+
     {
       field: "status",
       headerName: "Status",
@@ -100,13 +91,12 @@ export default function DocTable() {
         } else {
           return null;
         }
-      }
-    },
+      }},
+
     { field: "sender", headerName: "Sender", flex: 1, filter: true, valueGetter: params => params.data.sender ? `${params.data.sender.firstName} ${params.data.sender.department}` : "No sender info" },
-    {
-      field: "actionButtons", headerName: "", minWidth: 180, resizable: true, cellRenderer: params => (
-        <div className="flex gap-2 justify-start items-start h-full">
-          <FaMagnifyingGlass className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => setContentPDFUrl(params.data.contentPDF)} />
+    { field: "actionButtons", headerName: "", minWidth: 180, resizable: true, cellRenderer: params => (
+        <div className="flex gap-2 justify-center items-center h-full">
+          <FaMagnifyingGlass className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => setContentPDFUrl(params.data.contentPDF)}/>
           <MdEdit className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => { /* handle edit */ }} />
           <MdDeleteForever className="cursor-pointer hover:text-red-500 text-3xl" onClick={() => { /* handle delete */ }} />
         </div>
@@ -174,17 +164,6 @@ export default function DocTable() {
                 gridOptions={gridOptions}
                 columnDefs={columnDefs}
                 onGridReady={onGridReady}
-                domLayout='autoHeight'
-                getRowHeight={params => {
-                  if (params.node.level === 0) {
-                    const lineHeight = 16;
-                    const textLength = params.data.docHeader.length;
-                    const charPerLine = 30;
-                    const lines = Math.ceil(textLength / charPerLine);
-                    return lines * lineHeight + 20; // 20 is for padding
-                  }
-                  return 25;
-                }}
               />
             </div>
             <div className="md:w-[380px] w-[200px] flex justify-center items-center overflow-y-scroll rounded-md shadow-2xl">
