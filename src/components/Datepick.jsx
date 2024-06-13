@@ -34,17 +34,21 @@ export default function DatePickerValue({ onStartDateChange, onEndDateChange }) 
           label="Start Date"
           value={startDate}
           onChange={handleStartDateChange}
-          renderInput={(params) => <TextField {...params} />}
-          maxDate={endDate || dayjs()} 
+          slots={{
+            textField: (params) => <TextField {...params} />
+          }}
+          maxDate={endDate || dayjs()}
         />
         <h1 className='font-medium text-xl'>ถึง</h1>
         <DatePicker
           label="End Date"
           value={endDate}
           onChange={handleEndDateChange}
-          renderInput={(params) => <TextField {...params} />}
-          minDate={startDate} 
-          maxDate={dayjs()} 
+          slots={{
+            textField: (params) => <TextField {...params} />
+          }}
+          minDate={startDate}
+          maxDate={dayjs()}
         />
       </div>
     </LocalizationProvider>

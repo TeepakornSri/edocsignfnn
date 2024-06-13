@@ -77,12 +77,12 @@ export default function DocTable() {
       flex: 1,
       filter: true,
       autoHeight: true,
-      cellRendererFramework: params => (
+      cellRenderer: params => (
         <div style={{ whiteSpace: 'normal', overflowWrap: 'break-word', lineHeight: '1.5' }}>
           {params.value}
         </div>
       ),
-      cellStyle: { 'white-space': 'normal', 'word-wrap': 'break-word' }
+      cellStyle: { whiteSpace: 'normal', wordWrap: 'break-word' }
     },
     { field: "createdAt", headerName: "Submitted On", flex: 1, filter: true, cellRenderer: params => formatDate(params.value) },
     {
@@ -127,13 +127,13 @@ export default function DocTable() {
 
   const onGridReady = useCallback(params => {
     gridApi.current = params.api;
-    console.log('Grid API set:', gridApi.current);
+    // console.log('Grid API set:', gridApi.current);
   }, []);
 
   useEffect(() => {
     if (!gridApi.current || !filteredDocs.length) return;
-    console.log("Setting row data:", filteredDocs);
-    gridApi.current.setRowData(filteredDocs);
+    // console.log("Setting row data:", filteredDocs);
+    gridApi.current.updateGridOptions({ rowData: filteredDocs });
   }, [filteredDocs]);
 
   useEffect(() => {
@@ -181,7 +181,7 @@ export default function DocTable() {
                     const textLength = params.data.docHeader.length;
                     const charPerLine = 30;
                     const lines = Math.ceil(textLength / charPerLine);
-                    return lines * lineHeight + 20; // 20 is for padding
+                    return lines * lineHeight + 20; 
                   }
                   return 25;
                 }}

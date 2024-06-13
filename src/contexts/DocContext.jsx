@@ -1,63 +1,18 @@
-import { createContext, useEffect, useState } from "react";
-import axios from '../config/axios';
-import Swal from 'sweetalert2';
+import { createContext, useState } from "react";
 
 export const DocContext = createContext();
 
 export default function DocContextProvider({ children }) {
+    const [files, setFiles] = useState({});
 
-    const [allDoc, setAllDoc] = useState([])
-    const [loading, setLoading] = useState(true);
-    // const [DocbyId,setDocbyID] = useState(true)
+    const saveFile = (name, file) => {
+        setFiles(prevFiles => ({ ...prevFiles, [name]: file }));
+    };
 
-
-
-    // useEffect(() => {
-    //     setLoading(true); 
-    //     axios.get('/content/showalldoc')
-    //         .then(res => {
-    //             console.log("Response data:", res.data);
-    //             setAllDoc(res.data.Docids);
-    //         })
-    //         .catch(err => {
-    //             console.error(err);  
-    //             Swal.fire({
-    //                 icon: 'error',
-    //                 title: 'Oops...',
-    //                 text: 'Failed to fetch documents!',
-    //                 confirmButtonText: 'OK'
-    //             });
-    //         })
-    //         .finally(() => {
-    //             setLoading(false);  
-    //         });
-    // }, []); 
-
-    // useEffect(() => {
-    //     setLoading(true); 
-    //     axios.get('/content/showalldocbyId')
-    //         .then(res => {
-    //             setDocbyID(res.data.Docids);
-    //         })
-    //         .catch(err => {
-    //             console.error(err);  
-    //             Swal.fire({
-    //                 icon: 'error',
-    //                 title: 'Oops...',
-    //                 text: 'Failed to fetch documents!',
-    //                 confirmButtonText: 'OK'
-    //             });
-    //         })
-    //         .finally(() => {
-    //             setLoading(false);  
-    //         });
-    // }, []); 
-
-
-
+    const getFile = name => files[name];
 
     return (
-        <DocContext.Provider value={{allDoc,loading}}>
+        <DocContext.Provider value={{ saveFile, getFile }}>
             {children}
         </DocContext.Provider>
     );

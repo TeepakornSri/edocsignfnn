@@ -22,8 +22,8 @@ export default function SearchAppBar() {
         switch (path) {
             case '/upload':
                 return 'Upload Doc';
-            case '/edit':
-                return 'Edit Doc';
+            case '/userselect':
+                return 'User Select';
             case '/view':
                 return 'View Doc';
             default:
@@ -61,30 +61,35 @@ export default function SearchAppBar() {
             <AppBar position="sticky">
                 <Toolbar>
                     <div className='flex flex-row justify-evenly  w-full'>
-                        <Typography className = 'flex-1'>
+                        <Typography component="div" className='flex-1'>
                             <div className='flex flex-col gap-2 cursor-pointer'>
-                                <h1 className='text-white'>Sign in as</h1>
+                                <Typography component="h1" variant="body1" className='text-white'>Sign in as</Typography>
                                 {authUser ? (
-                                    <div className='text-white text-xl font-semibold'>
+                                    <Typography component="div" variant="body2" className='text-white text-xl font-semibold'>
                                         {`${authUser.firstName} - ${authUser.email}: ${authUser.department}`}
-                                    </div>
+                                    </Typography>
                                 ) : (
-                                    <div className='text-white text-xl font-semibold'>
+                                    <Typography component="div" variant="body2" className='text-white text-xl font-semibold'>
                                         Not logged in
-                                    </div>
+                                    </Typography>
                                 )}
                             </div>
                         </Typography>
-                        <Typography className='flex justify-center items-center flex-1  '>
-                            <h1 className='text-4xl font-semibold text-white cursor-pointer'>
+                        <Typography component="div" className='flex justify-center items-center flex-1'>
+                            <Typography component="h1" variant="h4" className='text-4xl font-semibold text-white cursor-pointer'>
                                 {getTitleByPath(location.pathname)}
-                            </h1>
+                            </Typography>
                         </Typography>
-                        <div className='flex flex-row justify-end items-center text-white flex-1 '>
+                        <div className='flex flex-row justify-end items-center text-white flex-1'>
                             <div className='flex flex-row gap-6'>
                                 <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer' onClick={handlereload}><IoReload /></div>
-                                {location.pathname !== '/upload' && (<Link to='/upload'>
-                                <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer'><IoIosAddCircleOutline /></div></Link>)}
+                                
+                                {location.pathname !== '/upload' && location.pathname !== '/userselect' && (
+                                <Link to='/upload'>
+                                    <div className='text-6xl font-bold hover:text-orange-400 cursor-pointer'>
+                                        <IoIosAddCircleOutline />
+                                    </div>
+                                </Link>)}
                             </div>
                             <div className='ml-12'>
                                 <IconButton

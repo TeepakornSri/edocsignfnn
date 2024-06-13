@@ -1,21 +1,32 @@
-import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
 import Joi from 'joi';
+import { useRef, useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import Loading from './Loading';
 import { useAuth } from '../hooks/use-auth';
 import InputErrorMessage from '../features/InputErrorMessage';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import UploadButton from './UploadButton';
-import { DocContext } from '../contexts/DocContext';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const CreateSchema = Joi.object({
     docNumber: Joi.string().trim().required(),
     docHeader: Joi.string().trim().required(),
     docInfo: Joi.string().trim().allow('').optional(),
     senderId: Joi.required(),
-    contentPDF: Joi.any().required(),
-    supportingDocuments: Joi.any().allow('').optional(),
+    contentPDF: Joi.any().custom((value, helpers) => {
+        if (!value) return helpers.error('any.required');
+        if (!value.name.match(/\.(pdf)$/i)) {
+            return helpers.error('any.invalid');
+        }
+        return value;
+    }).required(),
+    supportingDocuments: Joi.any().allow('').optional().custom((value, helpers) => {
+        if (!value) return value;
+        if (!value.name.match(/\.(pdf)$/i)) {
+            return helpers.error('any.invalid');
+        }
+        return value;
+    }),
 });
 
 const validateCreateContent = input => {
@@ -35,9 +46,8 @@ const generateRandomNumber = () => {
 };
 
 export default function Uploadform() {
-    const navigate = useNavigate();
     const { authUser } = useAuth();
-    const { saveFile } = useContext(DocContext);
+    const inputEl = useRef(null);
     const [loading, setLoading] = useState(false);
     const [contentPdfPreviewUrl, setContentPdfPreviewUrl] = useState(null);
     const [supportingDocumentsPreviewUrl, setSupportingDocumentsPreviewUrl] = useState(null);
@@ -71,7 +81,6 @@ export default function Uploadform() {
         if (files[0] && files[0].type === 'application/pdf') {
             const url = URL.createObjectURL(files[0]);
             setInput({ ...input, [name]: files[0] });
-            saveFile(name, files[0]);
 
             if (name === 'contentPDF') {
                 setContentPdfPreviewUrl(url);
@@ -87,46 +96,59 @@ export default function Uploadform() {
         }
     };
 
-    const handleSubmitCreateContent = e => {
+    const handleSubmitCreateContent = async e => {
         e.preventDefault();
-        const newError = {};
+        try {
+            const docNumber = `Doc-${generateRandomNumber()}`;
+            const formData = new FormData();
+            formData.append('docNumber', docNumber);
+            formData.append("senderId", senderId);
+            formData.append('docHeader', input.docHeader);
+            formData.append('docInfo', input.docInfo);
+            formData.append('contentPDF', input.contentPDF);
+            formData.append('supportingDocuments', input.supportingDocuments);
 
-        if (!input.contentPDF) {
-            newError.contentPDF = 'โปรดเลือกไฟล์ PDF';
-            toast.error('โปรดเลือกไฟล์ PDF');
+            console.log("Form Data Before Validation:", formData);
+
+            const validationError = validateCreateContent({ ...input, senderId, docNumber });
+            if (validationError) {
+                setError(validationError);
+                console.log("Validation Errors:", validationError);
+                return;
+            }
+            setError({});
+            setLoading(true);
+
+            const response = await axios.post('/content', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (response.status === 200) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Success',
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        } catch (err) {
+            console.error("Submission Error:", err);
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: 'Oops Something went wrong...',
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        } finally {
+            setLoading(false);
         }
-
-        if (!input.docHeader) {
-            newError.docHeader = 'โปรดกรอกชื่อเอกสาร';
-            toast.error('โปรดกรอกชื่อเอกสาร');
-        }
-
-        if (Object.keys(newError).length > 0) {
-            setError(newError);
-            return;
-        }
-
-        const docNumber = `Doc-${generateRandomNumber()}`;
-        const validationError = validateCreateContent({ ...input, senderId, docNumber });
-        if (validationError) {
-            setError(validationError);
-            Object.values(validationError).forEach(message => toast.error(message));
-            return;
-        }
-        setError({});
-        
-        const dataToSave = {
-            docNumber,
-            senderId,
-            docHeader: input.docHeader,
-            docInfo: input.docInfo,
-            contentPDF: input.contentPDF.name,
-            supportingDocuments: input.supportingDocuments?.name
-        };
-
-        // Save metadata to localStorage
-        localStorage.setItem('formData', JSON.stringify(dataToSave));
-        navigate('/userselect'); 
     };
 
     return (
@@ -158,9 +180,15 @@ export default function Uploadform() {
                         
                         <h1 className="font-semibold text-lg">แบบฟอร์มขออนุมัติ (PDF Only)</h1>
                         <UploadButton
+                            type="file"
+                            placeholder="contentPDF"
+                            ref={inputEl}
                             onChange={handleFileChange}
                             name="contentPDF"
-                            buttonName="อัพโหลดแบบฟอร์มขออนุมัติ"
+                            className={`block w-full border rounded-md px-3 py-1.5 text-sm outline-none
+                                focus:ring h-40 pt-4
+                                ${error.contentPDF ? 'border-red-500 focus:ring-red-300' : 'focus:ring-blue-300 focus:border-blue-500 border-gray-300'}
+                            `}
                         />
                         {error.contentPDF && <InputErrorMessage message={'โปรดเลือกไฟล์PDF'} />}
                         {contentPdfPreviewUrl && (
@@ -171,10 +199,17 @@ export default function Uploadform() {
                     <div className="w-full flex flex-col gap-6">
                         <h1 className="font-semibold text-lg">เอกสารประกอบการพิจารณา (PDF Only)</h1>
                         <UploadButton
+                            type="file"
+                            placeholder="supportingDocuments"
+                            ref={inputEl}
                             onChange={handleFileChange}
                             name="supportingDocuments"
-                            buttonName="อัพโหลดเอกสารประกอบการพิจารณา"
+                            className={`block w-full border rounded-md px-3 py-1.5 text-sm outline-none
+                                focus:ring h-40 pt-4
+                                ${error.supportingDocuments ? 'border-red-500 focus:ring-red-300' : 'focus:ring-blue-300 focus:border-blue-500 border-gray-300'}
+                            `}
                         />
+                        {error.supportingDocuments && <InputErrorMessage message={'โปรดเลือกไฟล์PDF'} />}
                         {supportingDocumentsPreviewUrl && (
                             <embed src={supportingDocumentsPreviewUrl} width="100%" height="500px" className="mt-4" type="application/pdf"></embed>
                         )}

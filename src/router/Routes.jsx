@@ -5,6 +5,7 @@ import UploadPage from '../pages/Upload';
 import RedirectIfAuthenticated from '../features/RedireactIfAuthenticated';
 import AuthenticatedUser from '../features/AuthenticateUser';
 import HomePage from '../pages/็Homepage';
+import Userselect from '../pages/Userselect';
 
 const router = createBrowserRouter([
     {
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
                 path: '',
                 element: <HomePage/>,
             },
+            
         ],
     },
 
@@ -45,6 +47,20 @@ const router = createBrowserRouter([
                 element: (
                     <AuthenticatedUser>
                         <UploadPage />
+                    </AuthenticatedUser>
+                ),
+            },
+        ],
+    },
+    {
+        path: '/userselect',
+        element: <Layout />,
+        children: [
+            {
+                path: '',
+                element: (
+                    <AuthenticatedUser>
+                        <Userselect />
                     </AuthenticatedUser>
                 ),
             },

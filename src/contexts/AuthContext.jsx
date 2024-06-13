@@ -70,10 +70,10 @@ export default function AuthContextProvider({ children }) {
         removeAccessToken();
         setAuthUser(null);
         setInitialLoading(false);
-      };
+    };
 
     return (
-        <AuthContext.Provider value={{ login, authUser, initialLoading, register, logout }}>
+        <AuthContext.Provider value={{ login, authUser, initialLoading, setInitialLoading, register, logout }}>
             {children}
         </AuthContext.Provider>
     );
