@@ -124,9 +124,8 @@ export default function UserSelectForm() {
             toast.error("โปรดเลือกผู้รับเอกสารอย่างน้อยหนึ่งคน");
             return;
         }
-
-        // Show SweetAlert2 confirmation dialog
-        const result = await Swal.fire({
+    
+        const confirmSubmit = await Swal.fire({
             title: 'ยืนยันการส่งเอกสาร',
             text: "คุณต้องการส่งเอกสารนี้หรือไม่?",
             icon: 'warning',
@@ -136,30 +135,30 @@ export default function UserSelectForm() {
             confirmButtonText: 'ใช่',
             cancelButtonText: 'ยกเลิก'
         });
-
-        if (result.isConfirmed) {
+    
+        if (confirmSubmit.isConfirmed) {
             const dataToSave = {
                 ...formData,
+                topic: selectedTopic,
                 recipients: selectedUsers.map(user => ({
                     recipientId: user.id,
-                    topic: selectedTopic
                 }))
             };
-
+    
             const formDataToSend = new FormData();
             formDataToSend.append('docNumber', dataToSave.docNumber);
             formDataToSend.append('senderId', dataToSave.senderId);
             formDataToSend.append('docHeader', dataToSave.docHeader);
             formDataToSend.append('docInfo', dataToSave.docInfo);
+            formDataToSend.append('topic', dataToSave.topic);
             formDataToSend.append('contentPDF', getFile('contentPDF'));
             if (dataToSave.supportingDocuments) {
                 formDataToSend.append('supportingDocuments', getFile('supportingDocuments'));
             }
             dataToSave.recipients.forEach((recipient, index) => {
                 formDataToSend.append(`recipients[${index}][recipientId]`, recipient.recipientId);
-                formDataToSend.append(`recipients[${index}][topic]`, recipient.topic);
             });
-
+    
             setLoading(true);
             try {
                 const response = await axios.post('/content', formDataToSend, {
@@ -167,20 +166,26 @@ export default function UserSelectForm() {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-
+    
                 if (response.status === 200) {
-                    toast.success("เอกสารถูกบันทึกเรียบร้อยแล้ว");
-
-                    // Clear local storage and URLs
-                    localStorage.removeItem('formData');
-                    if (contentPdfUrl) URL.revokeObjectURL(contentPdfUrl);
-                    if (supportingDocumentsUrl) URL.revokeObjectURL(supportingDocumentsUrl);
-
-                    setContentPdfUrl(null);
-                    setSupportingDocumentsUrl(null);
-
-                    navigate('/homepage');
-                    window.location.reload();
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: "เอกสารถูกบันทึกเรียบร้อยแล้ว",
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        // Clear local storage and URLs
+                        localStorage.removeItem('formData');
+                        if (contentPdfUrl) URL.revokeObjectURL(contentPdfUrl);
+                        if (supportingDocumentsUrl) URL.revokeObjectURL(supportingDocumentsUrl);
+    
+                        setContentPdfUrl(null);
+                        setSupportingDocumentsUrl(null);
+     
+                        navigate('/homepage');
+                        window.location.reload();
+                    });
                 }
             } catch (error) {
                 toast.error("เกิดข้อผิดพลาดในการบันทึกเอกสาร");
@@ -189,7 +194,8 @@ export default function UserSelectForm() {
             }
         }
     };
-
+    
+    
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
