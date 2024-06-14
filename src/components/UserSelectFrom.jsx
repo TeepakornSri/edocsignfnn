@@ -108,6 +108,10 @@ export default function UserSelectForm() {
         setShowSuggestions(false);
     };
 
+    const handleRemoveAllUsers = () => {
+        setSelectedUsers([]);
+    };
+
     const handleClickOutside = (event) => {
         if (inputRef.current && !inputRef.current.contains(event.target)) {
             setShowSuggestions(false);
@@ -124,7 +128,7 @@ export default function UserSelectForm() {
             toast.error("โปรดเลือกผู้รับเอกสารอย่างน้อยหนึ่งคน");
             return;
         }
-    
+
         const confirmSubmit = await Swal.fire({
             title: 'ยืนยันการส่งเอกสาร',
             text: "คุณต้องการส่งเอกสารนี้หรือไม่?",
@@ -135,7 +139,7 @@ export default function UserSelectForm() {
             confirmButtonText: 'ใช่',
             cancelButtonText: 'ยกเลิก'
         });
-    
+
         if (confirmSubmit.isConfirmed) {
             const dataToSave = {
                 ...formData,
@@ -145,7 +149,7 @@ export default function UserSelectForm() {
                     step: user.step 
                 }))
             };
-    
+
             const formDataToSend = new FormData();
             formDataToSend.append('docNumber', dataToSave.docNumber);
             formDataToSend.append('senderId', dataToSave.senderId);
@@ -160,7 +164,7 @@ export default function UserSelectForm() {
                 formDataToSend.append(`recipients[${index}][recipientId]`, recipient.recipientId);
                 formDataToSend.append(`recipients[${index}][step]`, recipient.step); // เพิ่ม step ตรงนี้
             });
-    
+
             setLoading(true);
             try {
                 const response = await axios.post('/content', formDataToSend, {
@@ -168,7 +172,7 @@ export default function UserSelectForm() {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-    
+
                 if (response.status === 200) {
                     Swal.fire({
                         position: "center",
@@ -181,10 +185,10 @@ export default function UserSelectForm() {
                         localStorage.removeItem('formData');
                         if (contentPdfUrl) URL.revokeObjectURL(contentPdfUrl);
                         if (supportingDocumentsUrl) URL.revokeObjectURL(supportingDocumentsUrl);
-    
+
                         setContentPdfUrl(null);
                         setSupportingDocumentsUrl(null);
-     
+
                         navigate('/homepage');
                         window.location.reload();
                     });
@@ -196,8 +200,7 @@ export default function UserSelectForm() {
             }
         }
     };
-    
-    
+
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
@@ -263,7 +266,7 @@ export default function UserSelectForm() {
                             </div>
                         </div>
                     </div>
-                    <div className='h-full w-full mt-2 border border-gray-400 rounded-lg shadow-xl'>
+                    <div className='md:h-[440px] w-full mt-2 border border-gray-400 rounded-lg shadow-xl overflow-y-scroll'>
                         {selectedUsers.length > 0 && (
                             <div className='text-xl flex flex-col gap-4 p-4'>
                                 {selectedUsers.map(user => (
@@ -274,9 +277,18 @@ export default function UserSelectForm() {
                                         <h1><strong className='text-blue-500 font-bold'>Department:</strong> {user.department}</h1>
                                     </div>
                                 ))}
+                               
                             </div>
                         )}
+                        
                     </div>
+                    <button
+                                    type="button"
+                                    className='text-red-500 hover:text-red-700 self-start p-4 font-semibold text-lg'
+                                    onClick={handleRemoveAllUsers}
+                                >
+                                    ยกเลิก
+                                </button>
                 </div>
                 <div className='flex flex-1 justify-center items-center rounded-lg flex-col'>
                     <div className='p-4 h-full w-full border shadow-2xl rounded-lg justify-center'>
