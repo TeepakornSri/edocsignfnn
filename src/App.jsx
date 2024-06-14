@@ -3,6 +3,7 @@ import Route from "./router/Routes"
 import { useAuth } from "./hooks/use-auth";
 import Loading from "./components/Loading";
 import "./App.css";
+import ApproveReject from "./components/Approve";
 
 function App() {
   const { initialLoading } = useAuth();

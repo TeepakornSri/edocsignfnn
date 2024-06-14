@@ -6,6 +6,7 @@ import RedirectIfAuthenticated from '../features/RedireactIfAuthenticated';
 import AuthenticatedUser from '../features/AuthenticateUser';
 import HomePage from '../pages/็Homepage';
 import Userselect from '../pages/Userselect';
+import ApproveReject from '../components/Approve';
 
 const router = createBrowserRouter([
     {
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
                 ),
             },
         ],
+    },
+    {
+        path: '/approve/:docId/:recipientId/:action', // เพิ่มเส้นทางใหม่
+        element: <ApproveReject />,
     },
 ]);
 

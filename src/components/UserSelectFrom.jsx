@@ -142,6 +142,7 @@ export default function UserSelectForm() {
                 topic: selectedTopic,
                 recipients: selectedUsers.map(user => ({
                     recipientId: user.id,
+                    step: user.step 
                 }))
             };
     
@@ -157,6 +158,7 @@ export default function UserSelectForm() {
             }
             dataToSave.recipients.forEach((recipient, index) => {
                 formDataToSend.append(`recipients[${index}][recipientId]`, recipient.recipientId);
+                formDataToSend.append(`recipients[${index}][step]`, recipient.step); // เพิ่ม step ตรงนี้
             });
     
             setLoading(true);
