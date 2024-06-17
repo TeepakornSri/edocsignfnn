@@ -233,7 +233,7 @@ export default function UserSelectForm() {
                             <div className='flex flex-row gap-4 relative' ref={inputRef}>
                                 <input
                                     type="text"
-                                    className='rounded-md shadow-md border border-stone-400'
+                                    className='rounded-md shadow-md border border-stone-400 focus:ring-blue-300 focus:border-blue-500 focus:outline-blue-500'
                                     value={search}
                                     onChange={handleInputChange}
                                 />
