@@ -3,11 +3,13 @@ import Joi from 'joi';
 import Loading from './Loading';
 import { useAuth } from '../hooks/use-auth';
 import InputErrorMessage from '../features/InputErrorMessage';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import UploadButton from './UploadButton';
 import { DocContext } from '../contexts/DocContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const CreateSchema = Joi.object({
     docNumber: Joi.string().trim().required(),
@@ -18,27 +20,13 @@ const CreateSchema = Joi.object({
     supportingDocuments: Joi.any().allow('').optional(),
 });
 
-const validateCreateContent = input => {
-    const { error } = CreateSchema.validate(input, { abortEarly: false });
-    if (error) {
-        const result = error.details.reduce((acc, el) => {
-            const { message, path } = el;
-            acc[path[0]] = message;
-            return acc;
-        }, {});
-        return result;
-    }
-};
-
-const generateRandomNumber = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-};
-
-export default function Uploadform() {
+export default function Updateform() {
+    const { docId } = useParams();
     const navigate = useNavigate();
     const { authUser } = useAuth();
     const { saveFile } = useContext(DocContext);
     const [loading, setLoading] = useState(false);
+    const [docById, setDocById] = useState(null);
     const [contentPdfPreviewUrl, setContentPdfPreviewUrl] = useState(null);
     const [supportingDocumentsPreviewUrl, setSupportingDocumentsPreviewUrl] = useState(null);
     const [input, setInput] = useState({
@@ -50,6 +38,34 @@ export default function Uploadform() {
     });
     const [error, setError] = useState({});
     const senderId = authUser?.id;
+
+    useEffect(() => {
+        setLoading(true);
+        axios.get(`/content/docId/${docId}`)
+            .then(res => {
+                setDocById(res.data.doc);
+                setInput({
+                    senderId: res.data.doc.sender.id,
+                    docHeader: res.data.doc.docHeader,
+                    docInfo: res.data.doc.docInfo,
+                    contentPDF: res.data.doc.contentPDF,
+                    supportingDocuments: res.data.doc.supportingDocuments,
+                });
+                setContentPdfPreviewUrl(res.data.doc.contentPDF);
+                setSupportingDocumentsPreviewUrl(res.data.doc.supportingDocuments);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'ไม่สามารถโหลดข้อมูลได้',
+                    confirmButtonText: 'OK'
+                });
+                setLoading(false);
+            });
+    }, [docId]);
 
     useEffect(() => {
         return () => {
@@ -106,30 +122,40 @@ export default function Uploadform() {
             return;
         }
 
-        const docNumber = `Doc-${generateRandomNumber()}`;
-        const validationError = validateCreateContent({ ...input, senderId, docNumber });
+        const validationError = validateCreateContent({ ...input, senderId, docNumber: docById.docNumber });
         if (validationError) {
             setError(validationError);
             Object.values(validationError).forEach(message => toast.error(message));
             return;
         }
         setError({});
-        
+
         const dataToSave = {
-            docNumber,
+            docNumber: docById.docNumber, 
             senderId,
             docHeader: input.docHeader,
             docInfo: input.docInfo,
-            contentPDF: input.contentPDF.name,
-            supportingDocuments: input.supportingDocuments?.name
+            contentPDF: input.contentPDF,
+            supportingDocuments: input.supportingDocuments,
+            recipients: docById.recipients
         };
 
-        // Log data to console
         console.log('Data to be sent to the next page:', dataToSave);
 
-        // Save metadata to localStorage
         localStorage.setItem('formData', JSON.stringify(dataToSave));
-        navigate('/userselect', { state: { dataToSave } }); 
+        navigate(`/upload/updateuserselect/${docId}`, { state: { dataToSave } });
+    };
+
+    const validateCreateContent = input => {
+        const { error } = CreateSchema.validate(input, { abortEarly: false });
+        if (error) {
+            const result = error.details.reduce((acc, el) => {
+                const { message, path } = el;
+                acc[path[0]] = message;
+                return acc;
+            }, {});
+            return result;
+        }
     };
 
     return (
@@ -149,7 +175,7 @@ export default function Uploadform() {
                                 focus:ring h-14
                                 ${error.docHeader ? 'border-red-500 focus:ring-red-300' : 'focus:ring-blue-300 focus:border-blue-500 border-gray-300'}`}
                         />
-                        {error.docHeader && <InputErrorMessage message={'กรอกชื่อเอกสาร'} />}
+                        {error.docHeader && <InputErrorMessage message={error.docHeader} />}
 
                         <h1 className="text-xl font-semibold">รายละเอียด</h1>
                         <textarea
@@ -158,50 +184,48 @@ export default function Uploadform() {
                             name="docInfo"
                             className={`block w-full border rounded-md px-3 py-1.5 text-sm h-48 outline-none focus:ring text-start resize-none`}
                         />
-                        
+
                         <h1 className="font-semibold text-lg">แบบฟอร์มขออนุมัติ (PDF Only)</h1>
                         <UploadButton
                             onChange={handleFileChange}
                             name="contentPDF"
                             buttonName="อัพโหลดแบบฟอร์มขออนุมัติ"
                         />
-                        {error.contentPDF && <InputErrorMessage message={'โปรดเลือกไฟล์PDF'} />}
+                        {error.contentPDF && <InputErrorMessage message={error.contentPDF} />}
                         {contentPdfPreviewUrl && (
                             <embed src={contentPdfPreviewUrl} width="100%" height="500px" className="mt-4" type="application/pdf"></embed>
                         )}
                     </div>
                     <div className='flex flex-col justify-start gap-20  w-full'>
-                    <div className="w-full flex flex-col gap-6">
-                        <h1 className="font-semibold text-lg">เอกสารประกอบการพิจารณา (PDF Only)</h1>
-                        <UploadButton
-                            onChange={handleFileChange}
-                            name="supportingDocuments"
-                            buttonName="อัพโหลดเอกสารประกอบการพิจารณา"
-                        />
-                        {supportingDocumentsPreviewUrl && (
-                            <embed src={supportingDocumentsPreviewUrl} width="100%" height="500px" className="mt-4" type="application/pdf"></embed>
-                        )}
-                    </div>
-                    <div className="flex flex-row justify-end items-end gap-8 ">
-                    <div>
-                        <Link to='/Homepage'>
-                            <button className="bg-slate-400 rounded-lg text-white px-3 py-1.5 text-lg font-bold min-w-[10rem] hover:bg-orange-300 hover:scale-125">
-                                ย้อนกลับ
-                            </button>
-                        </Link>
-                    </div>
-                    <div>
-                        <button
-                            type="submit"
-                            className="bg-orange-500 rounded-lg text-white px-3 py-1.5 text-lg font-bold min-w-[10rem] hover:bg-orange-300 hover:scale-125">
-                            ถัดไป
-                        </button>
+                        <div className="w-full flex flex-col gap-6">
+                            <h1 className="font-semibold text-lg">เอกสารประกอบการพิจารณา (PDF Only)</h1>
+                            <UploadButton
+                                onChange={handleFileChange}
+                                name="supportingDocuments"
+                                buttonName="อัพโหลดเอกสารประกอบการพิจารณา"
+                            />
+                            {supportingDocumentsPreviewUrl && (
+                                <embed src={supportingDocumentsPreviewUrl} width="100%" height="500px" className="mt-4" type="application/pdf"></embed>
+                            )}
+                        </div>
+                        <div className="flex flex-row justify-end items-end gap-8 ">
+                            <div>
+                                <Link to='/Homepage'>
+                                    <button className="bg-slate-400 rounded-lg text-white px-3 py-1.5 text-lg font-bold min-w-[10rem] hover:bg-orange-300 hover:scale-125">
+                                        ย้อนกลับ
+                                    </button>
+                                </Link>
+                            </div>
+                            <div>
+                                <button
+                                    type="submit"
+                                    className="bg-orange-500 rounded-lg text-white px-3 py-1.5 text-lg font-bold min-w-[10rem] hover:bg-orange-300 hover:scale-125">
+                                    ถัดไป
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                </div>
-                    
-                </div>
-
             </div>
         </form>
     );

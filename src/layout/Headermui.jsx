@@ -19,17 +19,21 @@ export default function SearchAppBar() {
     const location = useLocation();
 
     const getTitleByPath = (path) => {
-        switch (path) {
-            case '/upload':
-                return 'Upload Doc';
-            case '/userselect':
-                return 'User Select';
-            case '/view':
-                return 'View Doc';
-            default:
-                return 'HomePage';
+        if (path === '/upload') {
+            return 'Upload Doc';
+        } else if (path === '/userselect') {
+            return 'User Select';
+        } else if (path === '/view') {
+            return 'View Doc';
+        } else if (path.startsWith('/upload/update/')) {
+            return 'Update Doc';
+        } else if (path.startsWith('/upload/updateuserselect/')) {
+            return 'Update UserSelect';
+        } else {
+            return 'HomePage';
         }
     };
+    
 
     const handleLogout = async () => {
         await logout();
@@ -76,9 +80,11 @@ export default function SearchAppBar() {
                             </div>
                         </Typography>
                         <Typography component="div" className='flex justify-center items-center flex-1'>
+                            <Link to='/homepage'>
                             <Typography component="h1" variant="h4" className='text-4xl font-semibold text-white cursor-pointer'>
                                 {getTitleByPath(location.pathname)}
                             </Typography>
+                            </Link>
                         </Typography>
                         <div className='flex flex-row justify-end items-center text-white flex-1'>
                             <div className='flex flex-row gap-6'>

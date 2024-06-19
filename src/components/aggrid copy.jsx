@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
 import axios from '../config/axios';
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit } from "react-icons/md";
 import { MdDeleteForever } from "react-icons/md";
-import {useDoc} from "../hooks/use-doc"
+import { useDoc } from '../hooks/use-doc'
 
 export default function DocTable() {
   const [allDoc, setAllDoc] = useState([]);
@@ -22,13 +22,14 @@ export default function DocTable() {
   const [filteredDocs, setFilteredDocs] = useState([]);
   const [startDate, setStartDate] = useState(dayjs().startOf('month'));
   const [endDate, setEndDate] = useState(dayjs().endOf('month'));
-  const { softDeleteDocument } = useDoc();
+  const { softDeleteDocument } = useDoc(); 
 
   useEffect(() => {
     setLoading(true);
     axios.get('/content/showalldoc')
       .then(res => {
         setAllDoc(res.data.documents);
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
@@ -38,8 +39,6 @@ export default function DocTable() {
           text: 'ไม่สามารถโหลดข้อมูลได้',
           confirmButtonText: 'OK'
         });
-      })
-      .finally(() => {
         setLoading(false);
       });
   }, []);
@@ -51,7 +50,7 @@ export default function DocTable() {
     }
     const filtered = allDoc.filter(doc => {
       const docDate = dayjs(doc.createdAt);
-      return docDate.isBetween(startDate, endDate, null, '[]');
+      return docDate.isBetween(startDate, endDate, null, '[]') && !doc.deleted;
     });
     setFilteredDocs(filtered);
   }, [allDoc, startDate, endDate]);
@@ -69,6 +68,12 @@ export default function DocTable() {
   };
 
   const formatDate = dateString => dayjs(dateString).format('DD/MM/YYYY');
+
+  const handleSoftDelete = async (docId) => {
+    await softDeleteDocument(docId);
+    setAllDoc(prevDocs => prevDocs.map(doc => doc.id === docId ? { ...doc, deleted: true } : doc));
+  };
+
 
   const columnDefs = useMemo(() => [
     { field: "id", headerName: "ID", width: 90, filter: true },
@@ -110,7 +115,8 @@ export default function DocTable() {
         <div className="flex gap-2 justify-start items-start h-full">
           <FaMagnifyingGlass className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => setContentPDFUrl(params.data.contentPDF)} />
           <MdEdit className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => { /* handle edit */ }} />
-          <MdDeleteForever className="cursor-pointer hover:text-red-500 text-3xl" onClick={() => softDeleteDocument(params.data.id)} /></div>
+          <MdDeleteForever className="cursor-pointer hover:text-red-500 text-3xl" onClick={() => handleSoftDelete(params.data.id)} />
+        </div>
       )
     }
   ], [softDeleteDocument]);

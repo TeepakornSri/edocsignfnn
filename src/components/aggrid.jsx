@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
+import { useMemo, useCallback, useRef, useEffect, useState } from 'react';
 import axios from '../config/axios';
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
@@ -13,7 +13,9 @@ import Swal from 'sweetalert2';
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { MdEdit } from "react-icons/md";
 import { MdDeleteForever } from "react-icons/md";
-import { useDoc } from '../hooks/use-doc'
+import { useDoc } from '../hooks/use-doc';
+import { Link, useNavigate } from "react-router-dom";
+
 
 export default function DocTable() {
   const [allDoc, setAllDoc] = useState([]);
@@ -23,6 +25,8 @@ export default function DocTable() {
   const [startDate, setStartDate] = useState(dayjs().startOf('month'));
   const [endDate, setEndDate] = useState(dayjs().endOf('month'));
   const { softDeleteDocument } = useDoc(); 
+  const [DocbyId, setDocById] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -74,6 +78,19 @@ export default function DocTable() {
     setAllDoc(prevDocs => prevDocs.map(doc => doc.id === docId ? { ...doc, deleted: true } : doc));
   };
 
+  const handleEditClick = (params) => {
+    if (params.data.status !== 'PENDING') {
+      Swal.fire({
+        icon: 'error',
+        title: 'ไม่สามารถแก้ไขได้',
+        text: 'เอกสารนี้ไม่อยู่ในสถานะ PENDING และไม่สามารถแก้ไขได้',
+        confirmButtonText: 'OK'
+      });
+    } else {
+      setDocById(params.data);
+      navigate(`/upload/update/${params.data.id}`);
+    }
+  };
 
   const columnDefs = useMemo(() => [
     { field: "id", headerName: "ID", width: 90, filter: true },
@@ -114,7 +131,7 @@ export default function DocTable() {
       field: "actionButtons", headerName: "", minWidth: 180, resizable: true, cellRenderer: params => (
         <div className="flex gap-2 justify-start items-start h-full">
           <FaMagnifyingGlass className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => setContentPDFUrl(params.data.contentPDF)} />
-          <MdEdit className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => { /* handle edit */ }} />
+          <MdEdit className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => handleEditClick(params)} />
           <MdDeleteForever className="cursor-pointer hover:text-red-500 text-3xl" onClick={() => handleSoftDelete(params.data.id)} />
         </div>
       )
@@ -134,12 +151,12 @@ export default function DocTable() {
 
   const onGridReady = useCallback(params => {
     gridApi.current = params.api;
-    // console.log('Grid API set:', gridApi.current);
+    console.log('Grid API set:', gridApi.current);
   }, []);
 
   useEffect(() => {
     if (!gridApi.current || !filteredDocs.length) return;
-    // console.log("Setting row data:", filteredDocs);
+    console.log("Setting row data:", filteredDocs);
     gridApi.current.updateGridOptions({ rowData: filteredDocs });
   }, [filteredDocs]);
 

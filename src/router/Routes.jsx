@@ -7,6 +7,8 @@ import AuthenticatedUser from '../features/AuthenticateUser';
 import HomePage from '../pages/็Homepage';
 import Userselect from '../pages/Userselect';
 import ApproveReject from '../components/Approve';
+import UpdatePage from '../pages/Update';
+import UserselectUpdate from '../pages/UpdateUserselect';
 
 const router = createBrowserRouter([
     {
@@ -21,54 +23,59 @@ const router = createBrowserRouter([
                 ),
             },
         ],
-    }
-    ,
+    },
     {
         path: '/Homepage',
         element: (
-        <AuthenticatedUser>
-        <Layout />
-        </AuthenticatedUser>
+            <AuthenticatedUser>
+                <Layout />
+            </AuthenticatedUser>
         ),
         children: [
             {
                 path: '',
-                element: <HomePage/>,
+                element: <HomePage />,
             },
-            
         ],
     },
-
     {
         path: '/upload',
-        element: <Layout />,
+        element: (
+            <AuthenticatedUser>
+                <Layout />
+            </AuthenticatedUser>
+        ),
         children: [
             {
                 path: '',
-                element: (
-                    <AuthenticatedUser>
-                        <UploadPage />
-                    </AuthenticatedUser>
-                ),
+                element: <UploadPage />,
+            },
+            {
+                path: 'update/:docId', 
+                element: <UpdatePage />,
+            },
+            {
+                path: 'updateuserselect/:docId', 
+                element: <UserselectUpdate />,
             },
         ],
     },
     {
         path: '/userselect',
-        element: <Layout />,
+        element: (
+            <AuthenticatedUser>
+                <Layout />
+            </AuthenticatedUser>
+        ),
         children: [
             {
                 path: '',
-                element: (
-                    <AuthenticatedUser>
-                        <Userselect />
-                    </AuthenticatedUser>
-                ),
+                element: <Userselect />,
             },
         ],
     },
     {
-        path: '/approve/:docId/:recipientId/:action', // เพิ่มเส้นทางใหม่
+        path: '/approve/:docId/:recipientId/:action',
         element: <ApproveReject />,
     },
 ]);
