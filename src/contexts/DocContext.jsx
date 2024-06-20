@@ -12,16 +12,7 @@ export default function DocContextProvider({ children }) {
 
 
   const softDeleteDocument = async (docId) => {
-    const confirmResult = await Swal.fire({
-      title: 'ยืนยันการลบ',
-      text: 'คุณแน่ใจหรือไม่ว่าต้องการลบเอกสารนี้?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'ใช่',
-      cancelButtonText: 'ยกเลิก'
-    });
 
-    if (confirmResult.isConfirmed) {
       try {
         await axios.delete(`/content/${docId}/delete`);
         setAllDoc(prevDocs => prevDocs.filter(doc => doc.id !== docId));
@@ -40,7 +31,7 @@ export default function DocContextProvider({ children }) {
           confirmButtonText: 'OK'
         });
       }
-    }
+    
   };
 
   const saveFile = (name, file) => {

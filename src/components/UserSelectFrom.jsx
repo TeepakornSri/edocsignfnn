@@ -102,7 +102,7 @@ export default function UserSelectForm() {
     const handleSuggestionClick = (suggestion) => {
         if (!selectedUsers.some(user => user.id === suggestion.id)) {
             const step = selectedUsers.length + 1;
-            setSelectedUsers([...selectedUsers, { ...suggestion, step }]);
+            setSelectedUsers([...selectedUsers, { ...suggestion, step, topic: selectedTopic }]);
         }
         setSearch('');
         setShowSuggestions(false);
@@ -143,10 +143,10 @@ export default function UserSelectForm() {
         if (confirmSubmit.isConfirmed) {
             const dataToSave = {
                 ...formData,
-                topic: selectedTopic,
                 recipients: selectedUsers.map(user => ({
                     recipientId: user.id,
-                    step: user.step 
+                    step: user.step,
+                    topic: user.topic // ส่งหัวข้อไปพร้อมกับผู้ใช้
                 }))
             };
 
@@ -155,14 +155,14 @@ export default function UserSelectForm() {
             formDataToSend.append('senderId', dataToSave.senderId);
             formDataToSend.append('docHeader', dataToSave.docHeader);
             formDataToSend.append('docInfo', dataToSave.docInfo);
-            formDataToSend.append('topic', dataToSave.topic);
             formDataToSend.append('contentPDF', getFile('contentPDF'));
             if (dataToSave.supportingDocuments) {
                 formDataToSend.append('supportingDocuments', getFile('supportingDocuments'));
             }
             dataToSave.recipients.forEach((recipient, index) => {
                 formDataToSend.append(`recipients[${index}][recipientId]`, recipient.recipientId);
-                formDataToSend.append(`recipients[${index}][step]`, recipient.step); // เพิ่ม step ตรงนี้
+                formDataToSend.append(`recipients[${index}][step]`, recipient.step);
+                formDataToSend.append(`recipients[${index}][topic]`, recipient.topic); // เพิ่มหัวข้อตรงนี้
             });
 
             setLoading(true);
@@ -275,20 +275,19 @@ export default function UserSelectForm() {
                                         <h1><strong className='text-blue-500 font-bold'>Name:</strong> {`${user.firstName} ${user.lastName}`}</h1>
                                         <h1><strong className='text-blue-500 font-bold'>Email:</strong> {user.email}</h1>
                                         <h1><strong className='text-blue-500 font-bold'>Department:</strong> {user.department}</h1>
+                                        <h1><strong className='text-blue-500 font-bold'>Topic:</strong> {user.topic}</h1> {/* แสดงหัวข้อ */}
                                     </div>
                                 ))}
-                               
                             </div>
                         )}
-                        
                     </div>
                     <button
-                                    type="button"
-                                    className='text-red-500 hover:text-red-700 self-start p-4 font-semibold text-lg'
-                                    onClick={handleRemoveAllUsers}
-                                >
-                                    ยกเลิก
-                                </button>
+                        type="button"
+                        className='text-red-500 hover:text-red-700 self-start p-4 font-semibold text-lg'
+                        onClick={handleRemoveAllUsers}
+                    >
+                        ยกเลิก
+                    </button>
                 </div>
                 <div className='flex flex-1 justify-center items-center rounded-lg flex-col'>
                     <div className='p-4 h-full w-full border shadow-2xl rounded-lg justify-center'>

@@ -56,6 +56,7 @@ export default function UpdateUserSelectForm() {
                     lastName: recipient.recipient.lastName,
                     email: recipient.recipient.email,
                     department: recipient.recipient.department,
+                    topic: recipient.topic // เพิ่มฟิลด์ topic ที่นี่
                 })));
             }
         } else {
@@ -117,7 +118,7 @@ export default function UpdateUserSelectForm() {
     const handleSuggestionClick = (suggestion) => {
         if (!selectedUsers.some(user => user.id === suggestion.id)) {
             const step = selectedUsers.length + 1;
-            setSelectedUsers([...selectedUsers, { ...suggestion, step }]);
+            setSelectedUsers([...selectedUsers, { ...suggestion, step, topic: selectedTopic }]);
         }
         setSearch('');
         setShowSuggestions(false);
@@ -143,10 +144,10 @@ export default function UpdateUserSelectForm() {
             toast.error("โปรดเลือกผู้รับเอกสารอย่างน้อยหนึ่งคน");
             return;
         }
-    
+
         const confirmSubmit = await Swal.fire({
-            title: 'ยืนยันการส่งเอกสาร',
-            text: "คุณต้องการส่งเอกสารนี้หรือไม่?",
+            title: 'ยืนยันการแก้ไขเอกสาร',
+            text: "คุณต้องการแก้เอกสารนี้หรือไม่?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -154,28 +155,28 @@ export default function UpdateUserSelectForm() {
             confirmButtonText: 'ใช่',
             cancelButtonText: 'ยกเลิก'
         });
-    
+
         if (confirmSubmit.isConfirmed) {
             const recipientsToSave = selectedUsers.length > 0 ? selectedUsers.map((user) => ({
                 recipientId: user.id,
-                step: user.step
+                step: user.step,
+                topic: user.topic // เพิ่มฟิลด์ topic ที่นี่
             })) : formData.recipients.map((recipient) => ({
-                recipientId: recipient.recipient.id, // ใช้ค่า id จาก recipient
-                step: recipient.step
+                recipientId: recipient.recipient.id,
+                step: recipient.step,
+                topic: recipient.topic // เพิ่มฟิลด์ topic ที่นี่
             }));
-    
+
             const dataToSave = {
                 ...formData,
-                topic: selectedTopic,
                 recipients: recipientsToSave
             };
-    
+
             const formDataToSend = new FormData();
             formDataToSend.append('docNumber', dataToSave.docNumber);
             formDataToSend.append('senderId', dataToSave.senderId);
             formDataToSend.append('docHeader', dataToSave.docHeader);
             formDataToSend.append('docInfo', dataToSave.docInfo);
-            formDataToSend.append('topic', dataToSave.topic);
             
             // Append files only if they are not URLs
             if (typeof dataToSave.contentPDF !== 'string') {
@@ -189,9 +190,10 @@ export default function UpdateUserSelectForm() {
                 if (recipient.recipientId) {
                     formDataToSend.append(`recipients[${index}][recipientId]`, recipient.recipientId);
                     formDataToSend.append(`recipients[${index}][step]`, recipient.step);
+                    formDataToSend.append(`recipients[${index}][topic]`, recipient.topic); // เพิ่มหัวข้อตรงนี้
                 }
             });
-    
+
             setLoading(true);
             try {
                 const response = await axios.patch(`/content/update/${docId}`, formDataToSend, {
@@ -199,22 +201,22 @@ export default function UpdateUserSelectForm() {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-    
+
                 if (response.status === 200) {
                     Swal.fire({
                         position: "center",
                         icon: "success",
-                        title: "เอกสารถูกบันทึกเรียบร้อยแล้ว",
+                        title: "เอกสารถูกแก้ไขเรียบร้อยแล้ว",
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
                         localStorage.removeItem('formData');
                         if (contentPdfUrl) URL.revokeObjectURL(contentPdfUrl);
                         if (supportingDocumentsUrl) URL.revokeObjectURL(supportingDocumentsUrl);
-    
+
                         setContentPdfUrl(null);
                         setSupportingDocumentsUrl(null);
-    
+
                         navigate('/homepage');
                         window.location.reload();
                     });
@@ -226,7 +228,7 @@ export default function UpdateUserSelectForm() {
             }
         }
     };
-    
+
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
@@ -301,6 +303,7 @@ export default function UpdateUserSelectForm() {
                                         <h1><strong className='text-blue-500 font-bold'>Name:</strong> {`${user.firstName} ${user.lastName}`}</h1>
                                         <h1><strong className='text-blue-500 font-bold'>Email:</strong> {user.email}</h1>
                                         <h1><strong className='text-blue-500 font-bold'>Department:</strong> {user.department}</h1>
+                                        <h1><strong className='text-blue-500 font-bold'>Topic:</strong> {user.topic}</h1> {/* แสดงหัวข้อ */}
                                     </div>
                                 ))}
                             </div>

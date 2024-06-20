@@ -73,8 +73,31 @@ export default function DocTable() {
   const formatDate = dateString => dayjs(dateString).format('DD/MM/YYYY');
 
   const handleSoftDelete = async (docId) => {
-    await softDeleteDocument(docId);
-    setAllDoc(prevDocs => prevDocs.map(doc => doc.id === docId ? { ...doc, deleted: true } : doc));
+    const docToDelete = allDoc.find(doc => doc.id === docId);
+
+    if (docToDelete.status !== 'PENDING') {
+      Swal.fire({
+        icon: 'error',
+        title: 'ไม่สามารถลบได้',
+        text: 'เอกสารนี้ไม่อยู่ในสถานะ PENDING และไม่สามารถลบได้',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    const confirmResult = await Swal.fire({
+      title: 'ยืนยันการลบ',
+      text: 'คุณแน่ใจหรือไม่ว่าต้องการลบเอกสารนี้?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่',
+      cancelButtonText: 'ยกเลิก'
+    });
+
+    if (confirmResult.isConfirmed) {
+      await softDeleteDocument(docId);
+      setAllDoc(prevDocs => prevDocs.map(doc => doc.id === docId ? { ...doc, deleted: true } : doc));
+    }
   };
 
   const handleEditClick = (params) => {
