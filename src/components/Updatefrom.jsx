@@ -140,7 +140,7 @@ export default function Updateform() {
             recipients: docById.recipients
         };
 
-        console.log('Data to be sent to the next page:', dataToSave);
+        console.log('Data to be sent to the next page:', dataToSave); // Log data to console
 
         localStorage.setItem('formData', JSON.stringify(dataToSave));
         navigate(`/upload/updateuserselect/${docId}`, { state: { dataToSave } });
@@ -190,6 +190,7 @@ export default function Updateform() {
                             onChange={handleFileChange}
                             name="contentPDF"
                             buttonName="อัพโหลดแบบฟอร์มขออนุมัติ"
+                            accept="application/pdf"
                         />
                         {error.contentPDF && <InputErrorMessage message={error.contentPDF} />}
                         {contentPdfPreviewUrl && (
@@ -203,6 +204,7 @@ export default function Updateform() {
                                 onChange={handleFileChange}
                                 name="supportingDocuments"
                                 buttonName="อัพโหลดเอกสารประกอบการพิจารณา"
+                                accept="application/pdf"
                             />
                             {supportingDocumentsPreviewUrl && (
                                 <embed src={supportingDocumentsPreviewUrl} width="100%" height="500px" className="mt-4" type="application/pdf"></embed>

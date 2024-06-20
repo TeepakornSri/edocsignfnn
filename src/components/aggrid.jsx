@@ -16,7 +16,6 @@ import { MdDeleteForever } from "react-icons/md";
 import { useDoc } from '../hooks/use-doc';
 import { Link, useNavigate } from "react-router-dom";
 
-
 export default function DocTable() {
   const [allDoc, setAllDoc] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +91,10 @@ export default function DocTable() {
     }
   };
 
+  const togglePDFViewer = (url) => {
+    setContentPDFUrl(prevUrl => prevUrl === url ? '' : url);
+  };
+
   const columnDefs = useMemo(() => [
     { field: "id", headerName: "ID", width: 90, filter: true },
     { field: "docNumber", headerName: "Document Number", flex: 1, filter: true },
@@ -130,7 +133,7 @@ export default function DocTable() {
     {
       field: "actionButtons", headerName: "", minWidth: 180, resizable: true, cellRenderer: params => (
         <div className="flex gap-2 justify-start items-start h-full">
-          <FaMagnifyingGlass className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => setContentPDFUrl(params.data.contentPDF)} />
+          <FaMagnifyingGlass className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => togglePDFViewer(params.data.contentPDF)} />
           <MdEdit className="cursor-pointer hover:text-blue-800 text-3xl" onClick={() => handleEditClick(params)} />
           <MdDeleteForever className="cursor-pointer hover:text-red-500 text-3xl" onClick={() => handleSoftDelete(params.data.id)} />
         </div>
@@ -179,14 +182,14 @@ export default function DocTable() {
       <div className="ag-theme-alpine w-full h-full flex flex-row bg-slate-100 rounded-md shadow-2xl">
         {loading ? <Loading /> : (
           <>
-            <div className="flex-grow overflow-y-scroll">
-              <div className="flex flex-row justify-start items-center">
+            <div className={`flex-grow overflow-y-scroll transition-all duration-500 ${contentPDFUrl ? 'md:w-2/3 w-full' : 'w-full'}`}>
+              <div className="flex flex-row justify-start items-center mb-2">
                 <input
                   type="text"
                   id="filter-text-box"
                   placeholder="Quick search..."
                   onInput={onFilterTextBoxChanged}
-                  className="border border-stone-200 p-4 rounded-lg md:w-96 w-36 mb-2 shadow-2xl"
+                  className="border border-stone-200 p-4 rounded-lg md:w-96 w-36 shadow-2xl"
                 />
                 <DatePickerValue
                   onStartDateChange={handleStartDateChange}
@@ -211,11 +214,9 @@ export default function DocTable() {
                 }}
               />
             </div>
-            <div className="md:w-[380px] w-[200px] flex justify-center items-center overflow-y-scroll rounded-md shadow-2xl">
-              {contentPDFUrl ? (
+            <div className={`transition-all duration-500 overflow-y-scroll rounded-md shadow-2xl ${contentPDFUrl ? 'md:w-1/3 w-full' : 'w-0'}`}>
+              {contentPDFUrl && (
                 <embed src={contentPDFUrl} width="100%" height="100%" type="application/pdf" />
-              ) : (
-                <div className="text-center w-full">Select a file</div>
               )}
             </div>
           </>

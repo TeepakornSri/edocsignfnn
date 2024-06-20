@@ -79,6 +79,10 @@ export default function Uploadform() {
                 setSupportingDocumentsPreviewUrl(url);
             }
         } else {
+            setError(prevError => ({
+                ...prevError,
+                [name]: 'โปรดเลือกไฟล์ PDF'
+            }));
             if (name === 'contentPDF') {
                 setContentPdfPreviewUrl(null);
             } else if (name === 'supportingDocuments') {
@@ -164,6 +168,7 @@ export default function Uploadform() {
                             onChange={handleFileChange}
                             name="contentPDF"
                             buttonName="อัพโหลดแบบฟอร์มขออนุมัติ"
+                            accept="application/pdf"
                         />
                         {error.contentPDF && <InputErrorMessage message={'โปรดเลือกไฟล์PDF'} />}
                         {contentPdfPreviewUrl && (
@@ -177,7 +182,9 @@ export default function Uploadform() {
                             onChange={handleFileChange}
                             name="supportingDocuments"
                             buttonName="อัพโหลดเอกสารประกอบการพิจารณา"
+                            accept="application/pdf"
                         />
+                        {error.supportingDocuments && <InputErrorMessage message={'โปรดเลือกไฟล์PDF'} />}
                         {supportingDocumentsPreviewUrl && (
                             <embed src={supportingDocumentsPreviewUrl} width="100%" height="500px" className="mt-4" type="application/pdf"></embed>
                         )}

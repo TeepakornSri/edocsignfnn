@@ -176,10 +176,15 @@ export default function UpdateUserSelectForm() {
             formDataToSend.append('docHeader', dataToSave.docHeader);
             formDataToSend.append('docInfo', dataToSave.docInfo);
             formDataToSend.append('topic', dataToSave.topic);
-            formDataToSend.append('contentPDF', getFile('contentPDF'));
-            if (dataToSave.supportingDocuments) {
+            
+            // Append files only if they are not URLs
+            if (typeof dataToSave.contentPDF !== 'string') {
+                formDataToSend.append('contentPDF', getFile('contentPDF'));
+            }
+            if (dataToSave.supportingDocuments && typeof dataToSave.supportingDocuments !== 'string') {
                 formDataToSend.append('supportingDocuments', getFile('supportingDocuments'));
             }
+
             dataToSave.recipients.forEach((recipient, index) => {
                 if (recipient.recipientId) {
                     formDataToSend.append(`recipients[${index}][recipientId]`, recipient.recipientId);
@@ -222,8 +227,6 @@ export default function UpdateUserSelectForm() {
         }
     };
     
-    
-
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
